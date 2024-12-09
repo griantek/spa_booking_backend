@@ -120,6 +120,23 @@ app.get("/appointment/:phone", async (req, res, next) => {
   }
 });
 
+app.get("/confirmation", async (req, res) => {
+  const { phone } = req.query;
+  if (!phone) {
+    return res.status(400).json({ error: "Phone number is required!" });
+  }
+  try {
+    const appointment = await Appointment.findOne({ phone });
+    if (!appointment) {
+      return res.status(404).json({ error: "Appointment not found!" });
+    }
+    res.json(appointment);
+  } catch (error) {
+    console.error("Error fetching appointment:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 // Centralized Error Handler
 app.use((err, req, res, next) => {
   console.error("Error occurred:", err.message);

@@ -114,7 +114,6 @@ app.post("/submit-booking", async (req, res, next) => {
       appointmentId: appointment._id,
       alertTime:alertTime,
     });
-    await newReminder.save();
 
   } catch (error) {
     next(error);

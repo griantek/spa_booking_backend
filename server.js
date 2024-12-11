@@ -26,8 +26,16 @@ const appointmentSchema = new mongoose.Schema({
   date: { type: String, required: true },
   notes: String,
 });
-
 const Appointment = mongoose.model("Appointment", appointmentSchema);
+
+// Reminder Schema and Model
+const reminderSchema = new mongoose.Schema({
+  appointmentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Appointment', required: true }, // Reference to Appointment
+  alertTime: { type: Date, required: true }, // Alert time
+  status: { type: String, default: 'pending' } // Status of the reminder (e.g., pending, sent)
+});
+
+const Reminder = mongoose.model("Reminder", reminderSchema);
 
 // Middleware
 app.use(cors());
@@ -98,6 +106,16 @@ app.post("/submit-booking", async (req, res, next) => {
       { upsert: true, new: true }
     );
     res.json({ message: "Appointment saved successfully!", appointment });
+
+    const appointmentDateTime = new Date(`${date}T${time}`);
+    const alertTime = new Date(appointmentDateTime.getTime() - 60 * 60 * 1000); // 1 hour before
+
+    await Reminder.create({
+      appointmentId: appointment._id,
+      alertTime:alertTime,
+    });
+    await newReminder.save();
+
   } catch (error) {
     next(error);
   }
@@ -117,6 +135,16 @@ app.post("/modify-appointment", async (req, res, next) => {
       return res.status(404).json({ error: "Appointment not found!" });
     }
     res.json({ message: "Appointment updated successfully!", appointment });
+
+    const appointmentDateTime = new Date(`${date}T${time}`);
+    const alertTime = new Date(appointmentDateTime.getTime() - 60 * 60 * 1000); // 1 hour before
+
+    await Reminder.findOneAndUpdate(
+      { appointmentId: appointment._id },
+      { alertTime:alertTime},
+      { new: true }
+    );
+
   } catch (error) {
     next(error);
   }
@@ -131,6 +159,7 @@ app.post("/cancel-appointment", async (req, res, next) => {
     if (!result) {
       return res.status(404).json({ error: "Appointment not found!" });
     }
+    await Reminder.deleteOne({ appointmentId: result._id });
     res.json({ message: "Appointment canceled successfully!" });
   } catch (error) {
     next(error);

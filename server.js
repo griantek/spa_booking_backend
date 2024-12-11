@@ -7,6 +7,10 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const jwt = require("jsonwebtoken");
+
+const SECRET_KEY = process.env.JWT_SECRET || "your_secret_key";
+
 // MongoDB Connection
 mongoose
   .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -35,6 +39,34 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Health Check
 app.get("/", (req, res) => {
   res.status(200).send("API is working!");
+});
+
+// Endpoint to generate token
+app.get("/generate-token", (req, res) => {
+  const { phone } = req.query;
+  if (!phone) return res.status(400).json({ error: "Phone number is required" });
+
+  try {
+      const token = jwt.sign({ phone }, SECRET_KEY, { expiresIn: "15m" }); // Token valid for 15 minutes
+      res.json({ token });
+  } catch (error) {
+      console.error("Error generating token:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// Endpoint to validate token and retrieve phone number
+app.get("/validate-token", (req, res) => {
+  const { token } = req.query;
+  if (!token) return res.status(400).json({ error: "Token is required" });
+
+  try {
+      const decoded = jwt.verify(token, SECRET_KEY);
+      res.json({ phone: decoded.phone });
+  } catch (error) {
+      console.error("Invalid token:", error);
+      res.status(401).json({ error: "Invalid or expired token" });
+  }
 });
 
 // Check if a phone number exists

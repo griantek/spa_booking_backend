@@ -108,8 +108,8 @@ app.post("/submit-booking", async (req, res, next) => {
     res.json({ message: "Appointment saved successfully!", appointment });
 
     const appointmentDateTime = new Date(`${date}T${time}`);
-    const utcDateTime = new Date(appointmentDateTime.getTime() - appointmentDateTime.getTimezoneOffset() * 60000); // Adjust for timezone offset
-    const alertTime = new Date(utcDateTime.getTime() - 60 * 60 * 1000); // 1 hour before
+    console.log(appointmentDateTime)
+    const alertTime = new Date(appointmentDateTime.getTime() - 60 * 60 * 1000);
     console.log(alertTime)
 
     await Reminder.create({
@@ -138,8 +138,8 @@ app.post("/modify-appointment", async (req, res, next) => {
     res.json({ message: "Appointment updated successfully!", appointment });
 
     const appointmentDateTime = new Date(`${date}T${time}`);
-    const utcDateTime = new Date(appointmentDateTime.getTime() - appointmentDateTime.getTimezoneOffset() * 60000); // Adjust for timezone offset
-    const alertTime = new Date(utcDateTime.getTime() - 60 * 60 * 1000); // 1 hour before
+    console.log(appointmentDateTime)
+    const alertTime = new Date(appointmentDateTime.getTime() - 60 * 60 * 1000);
     console.log(alertTime)
 
     await Reminder.findOneAndUpdate(

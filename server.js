@@ -116,7 +116,7 @@ app.post("/submit-booking", async (req, res, next) => {
     // Store the UTC alert time in the Reminder collection
     await Reminder.create({
       appointmentId: appointment._id,
-      alertTime: alertTimeUTC, // Store the UTC time
+      alertTime: alertTimeISO, // Store the UTC time
     });
 
   } catch (error) {
@@ -147,7 +147,7 @@ app.post("/modify-appointment", async (req, res, next) => {
 
     await Reminder.findOneAndUpdate(
       { appointmentId: appointment._id },
-      { alertTime:alertTimeUTC},
+      { alertTime:alertTimeISO},
       { status: 'pending' },
       { new: true }
     );

@@ -144,8 +144,7 @@ app.post("/modify-appointment", async (req, res, next) => {
 
     await Reminder.findOneAndUpdate(
       { appointmentId: appointment._id },
-      { alertTime:alertTime},
-      { status:'pending'},
+      { alertTime:alertTime, status: 'pending' },
       { new: true }
       
     );

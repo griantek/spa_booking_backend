@@ -108,7 +108,9 @@ app.post("/submit-booking", async (req, res, next) => {
     res.json({ message: "Appointment saved successfully!", appointment });
 
     const appointmentDateTime = new Date(`${date}T${time}`);
-    const alertTime = new Date(appointmentDateTime.getTime() - 60 * 60 * 1000); // 1 hour before
+    const utcDateTime = new Date(appointmentDateTime.getTime() - appointmentDateTime.getTimezoneOffset() * 60000); // Adjust for timezone offset
+    const utcISOString = utcDateTime.toISOString(); // Convert to ISO string in UTC
+    const alertTime = new Date(utcISOString.getTime() - 60 * 60 * 1000); // 1 hour before
 
     await Reminder.create({
       appointmentId: appointment._id,
@@ -136,7 +138,9 @@ app.post("/modify-appointment", async (req, res, next) => {
     res.json({ message: "Appointment updated successfully!", appointment });
 
     const appointmentDateTime = new Date(`${date}T${time}`);
-    const alertTime = new Date(appointmentDateTime.getTime() - 60 * 60 * 1000); // 1 hour before
+    const utcDateTime = new Date(appointmentDateTime.getTime() - appointmentDateTime.getTimezoneOffset() * 60000); // Adjust for timezone offset
+    const utcISOString = utcDateTime.toISOString(); // Convert to ISO string in UTC
+    const alertTime = new Date(utcISOString.getTime() - 60 * 60 * 1000); // 1 hour before
 
     await Reminder.findOneAndUpdate(
       { appointmentId: appointment._id },

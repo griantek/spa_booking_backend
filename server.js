@@ -107,12 +107,16 @@ app.post("/submit-booking", async (req, res, next) => {
     );
     res.json({ message: "Appointment saved successfully!", appointment });
 
-    const appointmentDateTime = new Date(`${date}T${time}`);
-    const alertTime = new Date(appointmentDateTime.getTime() - 60 * 60 * 1000); // 1 hour before
+    const appointmentDateTime = new Date(`${date}T${time}`); // Create Date object based on provided date and time
+    const alertTime = new Date(appointmentDateTime.getTime() - 60 * 60 * 1000); // 1 hour before appointment time
 
+    //Convert alert time to UTC
+    const alertTimeUTC = new Date(alertTime.toUTCString()); // Convert alert time to UTC
+
+    // Store the UTC alert time in the Reminder collection
     await Reminder.create({
       appointmentId: appointment._id,
-      alertTime:alertTime,
+      alertTime: alertTimeUTC, // Store the UTC time
     });
 
   } catch (error) {
@@ -138,9 +142,12 @@ app.post("/modify-appointment", async (req, res, next) => {
     const appointmentDateTime = new Date(`${date}T${time}`);
     const alertTime = new Date(appointmentDateTime.getTime() - 60 * 60 * 1000); // 1 hour before
 
+    const alertTimeUTC = new Date(alertTime.toUTCString()); // Convert alert time to UTC
+
     await Reminder.findOneAndUpdate(
       { appointmentId: appointment._id },
-      { alertTime:alertTime},
+      { alertTime:alertTimeUTC},
+      { status: 'pending' },
       { new: true }
     );
 

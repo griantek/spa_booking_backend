@@ -110,8 +110,8 @@ app.post("/submit-booking", async (req, res, next) => {
     const appointmentDateTime = new Date(`${date}T${time}`); // Create Date object based on provided date and time
     const alertTime = new Date(appointmentDateTime.getTime() - 60 * 60 * 1000); // 1 hour before appointment time
 
-    //Convert alert time to UTC
-    const alertTimeUTC = new Date(alertTime.toUTCString()); // Convert alert time to UTC
+    // Convert alert time to ISO string format (UTC)
+    const alertTimeISO = alertTime.toISOString(); // Convert alert time to UTC
 
     // Store the UTC alert time in the Reminder collection
     await Reminder.create({
@@ -142,7 +142,8 @@ app.post("/modify-appointment", async (req, res, next) => {
     const appointmentDateTime = new Date(`${date}T${time}`);
     const alertTime = new Date(appointmentDateTime.getTime() - 60 * 60 * 1000); // 1 hour before
 
-    const alertTimeUTC = new Date(alertTime.toUTCString()); // Convert alert time to UTC
+    // Convert alert time to ISO string format (UTC)
+    const alertTimeISO = alertTime.toISOString();
 
     await Reminder.findOneAndUpdate(
       { appointmentId: appointment._id },

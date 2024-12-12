@@ -109,12 +109,13 @@ app.post("/submit-booking", async (req, res, next) => {
 
     const appointmentDateTime = new Date(`${date}T${time}`);
     const utcDateTime = new Date(appointmentDateTime.getTime() - appointmentDateTime.getTimezoneOffset() * 60000); // Adjust for timezone offset
-    const utcISOString = utcDateTime.toISOString(); // Convert to ISO string in UTC
-    const alertTime = new Date(utcISOString.getTime() - 60 * 60 * 1000); // 1 hour before
+    // Use utcDateTime (which is already a Date object in UTC)
+    const alertTime = new Date(utcDateTime.getTime() - 60 * 60 * 1000); // 1 hour before
+    const utcAlertTime = alertTime.toISOString(); // Convert to ISO string in UTC
 
     await Reminder.create({
       appointmentId: appointment._id,
-      alertTime:alertTime,
+      alertTime:utcAlertTime,
     });
 
   } catch (error) {
@@ -139,12 +140,13 @@ app.post("/modify-appointment", async (req, res, next) => {
 
     const appointmentDateTime = new Date(`${date}T${time}`);
     const utcDateTime = new Date(appointmentDateTime.getTime() - appointmentDateTime.getTimezoneOffset() * 60000); // Adjust for timezone offset
-    const utcISOString = utcDateTime.toISOString(); // Convert to ISO string in UTC
-    const alertTime = new Date(utcISOString.getTime() - 60 * 60 * 1000); // 1 hour before
+    // Use utcDateTime (which is already a Date object in UTC)
+    const alertTime = new Date(utcDateTime.getTime() - 60 * 60 * 1000); // 1 hour before
+    const utcAlertTime = alertTime.toISOString(); // Convert to ISO string in UTC
 
     await Reminder.findOneAndUpdate(
       { appointmentId: appointment._id },
-      { alertTime:alertTime},
+      { alertTime:utcAlertTime},
       { new: true },
       { status:'pending'}
     );

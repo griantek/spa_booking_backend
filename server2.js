@@ -11,6 +11,9 @@ const jwt = require("jsonwebtoken");
 
 const SECRET_KEY = process.env.JWT_SECRET || "your_secret_key";
 
+// In-memory store for short URLs
+const urlStore = {}; // Example: { "shortCode": "originalUrl" }
+
 // MongoDB Connection
 mongoose
   .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -42,6 +45,16 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Function to generate short code for the URL
+const generateShortCode = () => {
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let shortCode = "";
+    for (let i = 0; i < 10; i++) {
+      shortCode += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return shortCode;
+  };
+
 // Routes
 
 // Health Check
@@ -49,29 +62,13 @@ app.get("/", (req, res) => {
   res.status(200).send("API is working!");
 });
 
-
-
-// Helper function to generate an 8-character random alphanumeric token
-function generateSimpleToken() {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let token = "";
-  for (let i = 0; i < 8; i++) {
-      token += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return token;
-}
-
-// In-memory storage for tokens (key-value store: token -> phone)
-const tokenStore = {};  
-
 // Endpoint to generate token
 app.get("/generate-token", (req, res) => {
   const { phone } = req.query;
   if (!phone) return res.status(400).json({ error: "Phone number is required" });
 
   try {
-      const token = generateSimpleToken();
-      tokenStore[token] = phone; // Store the token with the associated phone number
+      const token = jwt.sign({ phone }, SECRET_KEY, { expiresIn: "10m", algorithm: "HS256"}); // Token valid for 15 minutes
       res.json({ token });
   } catch (error) {
       console.error("Error generating token:", error);
@@ -85,9 +82,8 @@ app.get("/validate-token", (req, res) => {
   if (!token) return res.status(400).json({ error: "Token is required" });
 
   try {
-      const phone = tokenStore[token];
-      if (!phone) throw new Error("Token not found");
-      res.json({ phone });
+      const decoded = jwt.verify(token, SECRET_KEY);
+      res.json({ phone: decoded.phone });
   } catch (error) {
       console.error("Invalid token:", error);
       res.status(401).json({ error: "Invalid or expired token" });

@@ -55,7 +55,7 @@ app.get("/generate-token", (req, res) => {
   if (!phone) return res.status(400).json({ error: "Phone number is required" });
 
   try {
-      const token = jwt.sign({ phone }, SECRET_KEY, { expiresIn: "10m" }); // Token valid for 15 minutes
+      const token = jwt.sign({ phone }, SECRET_KEY, { expiresIn: "10m", algorithm: "HS256"}); // Token valid for 15 minutes
       res.json({ token });
   } catch (error) {
       console.error("Error generating token:", error);

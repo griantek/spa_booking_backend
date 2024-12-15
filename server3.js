@@ -47,6 +47,50 @@ app.get("/", (req, res) => {
 });
 
 
+
+// Helper function to generate an 8-character random alphanumeric token
+function generateSimpleToken() {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let token = "";
+  for (let i = 0; i < 8; i++) {
+      token += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return token;
+}
+
+// In-memory storage for tokens (key-value store: token -> phone)
+const tokenStore = {};  
+
+// Endpoint to generate token
+app.get("/generate-token", (req, res) => {
+  const { phone } = req.query;
+  if (!phone) return res.status(400).json({ error: "Phone number is required" });
+
+  try {
+      const token = generateSimpleToken();
+      tokenStore[token] = phone; // Store the token with the associated phone number
+      res.json({ token });
+  } catch (error) {
+      console.error("Error generating token:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// Endpoint to validate token and retrieve phone number
+app.get("/validate-token", (req, res) => {
+  const { token } = req.query;
+  if (!token) return res.status(400).json({ error: "Token is required" });
+
+  try {
+      const phone = tokenStore[token];
+      if (!phone) throw new Error("Token not found");
+      res.json({ phone });
+  } catch (error) {
+      console.error("Invalid token:", error);
+      res.status(401).json({ error: "Invalid or expired token" });
+  }
+});
+
 // Check if a phone number exists
 app.get("/check-phone/:phone", async (req, res, next) => {
   try {

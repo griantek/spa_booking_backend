@@ -63,7 +63,7 @@ const tokenStore = {};
 
 // Updated /generate-token
 app.get("/generate-token", (req, res) => {
-  const { phone, name } = req.query;
+  const { phone, name, chat } = req.query;
   if (!phone || !name) {
     return res.status(400).json({ error: "Phone and Name are required" });
   }

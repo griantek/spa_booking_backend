@@ -82,13 +82,14 @@ app.get("/generate-token", (req, res) => {
 app.get("/validate-token", (req, res) => {
   const { token } = req.query;
   if (!token) return res.status(400).json({ error: "Token is required" });
-
   try {
     const data = tokenStore[token]; // Retrieve phone and name using token
+    console.log("token retrieved")
     if (!data) throw new Error("Token not found");
     res.json(data); // Respond with phone and name
   } catch (error) {
     console.error("Invalid token:", error);
+    console.log("token retrieved")
     res.status(401).json({ error: "Invalid or expired token" });
   }
 });

@@ -62,38 +62,34 @@ function generateSimpleToken() {
 const tokenStore = {};  
 
 // Endpoint to generate token
-// Updated /generate-token
 app.get("/generate-token", (req, res) => {
-  const { phone, name } = req.query;
-  if (!phone || !name) {
-    return res.status(400).json({ error: "Phone and Name are required" });
-  }
+  const { phone } = req.query;
+  if (!phone) return res.status(400).json({ error: "Phone number is required" });
 
   try {
-    const token = generateSimpleToken(); // Generate a token
-    tokenStore[token] = { phone, name }; // Store token with both phone and name
-    res.json({ token });
+      const token = generateSimpleToken();
+      tokenStore[token] = phone; // Store the token with the associated phone number
+      res.json({ token });
   } catch (error) {
-    console.error("Error generating token:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+      console.error("Error generating token:", error);
+      res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-// Updated /validate-token
+// Endpoint to validate token and retrieve phone number
 app.get("/validate-token", (req, res) => {
   const { token } = req.query;
   if (!token) return res.status(400).json({ error: "Token is required" });
 
   try {
-    const data = tokenStore[token]; // Retrieve phone and name using token
-    if (!data) throw new Error("Token not found");
-    res.json(data); // Respond with phone and name
+      const phone = tokenStore[token];
+      if (!phone) throw new Error("Token not found");
+      res.json({ phone });
   } catch (error) {
-    console.error("Invalid token:", error);
-    res.status(401).json({ error: "Invalid or expired token" });
+      console.error("Invalid token:", error);
+      res.status(401).json({ error: "Invalid or expired token" });
   }
 });
-
 
 // Check if a phone number exists
 app.get("/check-phone/:phone", async (req, res, next) => {

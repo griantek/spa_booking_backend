@@ -70,7 +70,7 @@ app.get("/generate-token", (req, res) => {
 
   try {
     const token = generateSimpleToken(); // Generate a token
-    tokenStore[token] = { phone, name, chat }; // Store token with both phone and name
+    tokenStore[token] = { phone, name }; // Store token with both phone and name
     res.json({ token });
   } catch (error) {
     console.error("Error generating token:", error);
